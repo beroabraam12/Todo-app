@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:todo/component/new_todo.dart';
-import 'package:todo/models/todo.dart';
+import 'package:todo/component/task.dart';
+import 'package:todo/pages/list_done.dart';
+import 'package:todo/provider/todo.dart';
 
 class ListPage extends StatefulWidget {
   static final routeName = "/";
@@ -10,73 +13,27 @@ class ListPage extends StatefulWidget {
 }
 
 class _ListPageState extends State<ListPage> {
-  List<Todo> todos = [
-    Todo(
-      id: "1",
-      name: "Todo1 here is my first todo ever in my life",
-      desc: "dasdasdasdasdasdasdasdas",
-      date: DateTime.now(),
-      time: TimeOfDay.now(),
-      image: "assets/cart.png",
-      color: Color(0xFFFEA64C),
-    ),
-    Todo(
-      id: "2",
-      name: "Todo1 here is my first todo ever in my life",
-      desc: "dasdasdasdasdasdasdasdas",
-      date: DateTime.now(),
-      time: TimeOfDay.now(),
-      image: "assets/gm.png",
-      color: Color(0xFFFE1E9A),
-    ),
-    Todo(
-      id: "3",
-      name: "Todo1 here is my first todo ever in my life",
-      desc: "dasdasdasdasdasdasdasdas",
-      date: DateTime.now(),
-      time: TimeOfDay.now(),
-      image: "assets/location.png",
-      color: Color(0xFF254DDE),
-    ),
-  ];
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
-  addTodos(id, color, name, date, desc, selectIcon, time) {
-    setState(() {
-      todos.add(Todo(
-        id: id.toString(),
-        color: color,
-        name: name,
-        date: date,
-        desc: desc,
-        image: selectIcon,
-        time: time,
-        done: false,
-      ));
-    });
-    Navigator.of(context).pop();
-    setState(() {});
-  }
-
-  bool editMode = false;
   @override
   Widget build(BuildContext context) {
     final mediaQuery = MediaQuery.of(context);
+    final todoData = Provider.of<Todo>(context);
+    final todos = todoData.todos;
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: <Widget>[
           FloatingActionButton(
+            heroTag: "a",
             onPressed: () {
-              setState(() {
-                editMode = !editMode;
-              });
+              todoData.editTodo();
             },
             child: Container(
               width: double.infinity,
               height: double.infinity,
-              child: Icon(Icons.done),
+              child: Icon(todoData.editMode ? Icons.done_all : Icons.done),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(50),
                 gradient: LinearGradient(
@@ -92,23 +49,11 @@ class _ListPageState extends State<ListPage> {
             ),
           ),
           FloatingActionButton(
-            onPressed: () {},
-            child: Container(
-              width: double.infinity,
-              height: double.infinity,
-              child: Icon(
-                Icons.calendar_today,
-                color: Color(0xffFE1E9A),
-              ),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50), color: Colors.white),
-            ),
-          ),
-          FloatingActionButton(
+            heroTag: "b",
             onPressed: () {
               scaffoldKey.currentState.showBottomSheet(
                 (context) {
-                  return NewTodo(addTodos);
+                  return NewTodo(todoData.addTodos);
                 },
               );
             },
@@ -141,7 +86,9 @@ class _ListPageState extends State<ListPage> {
         actions: <Widget>[
           IconButton(
             icon: Image.asset("assets/nav.png"),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).pushNamed(ListDonePage.routeName);
+            },
           ),
         ],
         title: Text(
@@ -167,99 +114,106 @@ class _ListPageState extends State<ListPage> {
               child: ListView.builder(
                 itemCount: todos.length,
                 itemBuilder: (context, i) {
-                  return Container(
-                    margin: EdgeInsets.only(
-                        top: mediaQuery.size.height * 0.02,
-                        left: mediaQuery.size.width * 0.03,
-                        right: mediaQuery.size.width * 0.03),
-                    width: mediaQuery.size.width * 0.8,
-                    height: mediaQuery.size.height * 0.11,
-                    child: Card(
-                      color: Colors.white,
-                      elevation: 1,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Stack(
-                            children: <Widget>[
-                              Container(
-                                margin: EdgeInsets.only(
-                                    left: mediaQuery.size.width * 0.02),
-                                width: mediaQuery.size.width * 0.03,
-                                child: CircleAvatar(
-                                  backgroundColor: todos[i].color,
-                                ),
-                              ),
-                              Center(
-                                child: Container(
+                  return GestureDetector(
+                    onTap: () {
+                      TaskPopup.showtaskDialog(context, todos[i]);
+                    },
+                    child: Container(
+                      margin: EdgeInsets.only(
+                          top: mediaQuery.size.height * 0.02,
+                          left: mediaQuery.size.width * 0.03,
+                          right: mediaQuery.size.width * 0.03),
+                      width: mediaQuery.size.width * 0.8,
+                      height: mediaQuery.size.height * 0.11,
+                      child: Card(
+                        color: Colors.white,
+                        elevation: 1,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Stack(
+                              children: <Widget>[
+                                Container(
                                   margin: EdgeInsets.only(
-                                    left: mediaQuery.size.width * 0.05,
-                                  ),
-                                  width: mediaQuery.size.width * 0.12,
-                                  height: mediaQuery.size.width * 0.12,
+                                      left: mediaQuery.size.width * 0.02),
+                                  width: mediaQuery.size.width * 0.03,
                                   child: CircleAvatar(
-                                    backgroundImage: AssetImage(todos[i].image),
+                                    backgroundColor: todos[i].color,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                            width: mediaQuery.size.width * 0.03,
-                          ),
-                          Center(
-                            child: Container(
-                              width: mediaQuery.size.width * 0.55,
-                              child: Text(
-                                todos[i].name,
-                                maxLines: 1,
+                                Center(
+                                  child: Container(
+                                    margin: EdgeInsets.only(
+                                      left: mediaQuery.size.width * 0.05,
+                                    ),
+                                    width: mediaQuery.size.width * 0.12,
+                                    height: mediaQuery.size.width * 0.12,
+                                    child: CircleAvatar(
+                                      backgroundImage:
+                                          AssetImage(todos[i].image),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              width: mediaQuery.size.width * 0.03,
+                            ),
+                            Center(
+                              child: Container(
+                                width: mediaQuery.size.width * 0.55,
+                                child: Text(
+                                  todos[i].name,
+                                  maxLines: 1,
+                                ),
                               ),
                             ),
-                          ),
-                          SizedBox(
-                            width: mediaQuery.size.width * 0.03,
-                          ),
-                          editMode
-                              ? Column(
-                                  children: <Widget>[
-                                    SizedBox(
-                                      height: mediaQuery.size.height * 0.02,
-                                    ),
-                                    Checkbox(
-                                        value: todos[i].done == null
-                                            ? false
-                                            : todos[i].done,
-                                        onChanged: (val) {
-                                          setState(() {
-                                            todos[i].done = val;
-                                            print(val);
-                                          });
-                                        })
-                                  ],
-                                )
-                              : Column(
-                                  children: <Widget>[
-                                    SizedBox(
-                                        height: mediaQuery.size.height * 0.02),
-                                    Text(
-                                      DateFormat("d MMM")
-                                          .format(todos[i].date)
-                                          .toString(),
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    SizedBox(
-                                        height: mediaQuery.size.height * 0.02),
-                                    Text(
-                                      "${todos[i].time.hour.toString()}:${todos[i].time.minute.toString()}",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                )
-                        ],
+                            SizedBox(
+                              width: mediaQuery.size.width * 0.03,
+                            ),
+                            todoData.editMode
+                                ? Column(
+                                    children: <Widget>[
+                                      SizedBox(
+                                        height: mediaQuery.size.height * 0.02,
+                                      ),
+                                      Checkbox(
+                                          value: todos[i].done == null
+                                              ? false
+                                              : todos[i].done,
+                                          onChanged: (val) {
+                                            setState(() {
+                                              todos[i].done = val;
+                                            });
+                                          })
+                                    ],
+                                  )
+                                : Column(
+                                    children: <Widget>[
+                                      SizedBox(
+                                          height:
+                                              mediaQuery.size.height * 0.02),
+                                      Text(
+                                        DateFormat("d MMM")
+                                            .format(todos[i].date)
+                                            .toString(),
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      SizedBox(
+                                          height:
+                                              mediaQuery.size.height * 0.02),
+                                      Text(
+                                        "${todos[i].time.hour.toString()}:${todos[i].time.minute.toString()}",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                    ],
+                                  )
+                          ],
+                        ),
                       ),
                     ),
                   );

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 
-class Todo {
+class TodoModel {
   final String id, image, name, desc;
   final DateTime date;
   final TimeOfDay time;
   final Color color;
   bool done;
 
-  Todo({
+  TodoModel({
     @required this.id,
     @required this.image,
     @required this.name,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:todo/models/todo.dart';
 
 class NewTodo extends StatefulWidget {
   final addTodos;
@@ -188,11 +187,15 @@ class _NewTodoState extends State<NewTodo> {
                   ),
                   child: FlatButton(
                     onPressed: () {
-
-                      setState(() {
-                        widget.addTodos(DateTime.now(),Color(0xFFFEA64C),name,date,desc,selectIcon,time);
-                        
-                      });
+                      if (date != null &&
+                          time != null &&
+                          name != null &&
+                          desc != null &&
+                          selectIcon != null) {
+                          widget.addTodos(DateTime.now(), Color(0xFFFEA64C),
+                              name, date, desc, selectIcon, time);
+                          Navigator.of(context).pop();
+                      }
                     },
                     child: Container(
                       margin: EdgeInsets.symmetric(
