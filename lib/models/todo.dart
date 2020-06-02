@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-class Todo{
-  final String  id,image,name,desc;
+class Todo {
+  final String id, image, name, desc;
   final DateTime date;
   final TimeOfDay time;
   final Color color;
+  bool done;
 
   Todo({
     @required this.id,
@@ -14,5 +15,6 @@ class Todo{
     @required this.date,
     @required this.time,
     @required this.color,
+    done = false,
   });
 }
